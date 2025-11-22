@@ -89,6 +89,19 @@ def detect_gesture(landmarks):
     
     return None
 
+# UI: on-screen Exit button
+BUTTON = (10, 10, 120, 40)  # x, y, w, h
+state = {"exit": False}
+
+def on_mouse(event, x, y, flags, param):
+    if event == cv2.EVENT_LBUTTONDOWN:
+        bx, by, bw, bh = BUTTON
+        if bx <= x <= bx + bw and by <= y <= by + bh:
+            state["exit"] = True
+
+cv2.namedWindow("Hand Gesture Control")
+cv2.setMouseCallback("Hand Gesture Control", on_mouse)
+
 while True:
     ret, frame = camera.read()
     if not ret:
@@ -108,20 +121,28 @@ while True:
 
             if gesture == "thumbs_up":
                 pyautogui.press('w')
-                cv2.putText(frame, "W - Thumbs Up", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                cv2.putText(frame, "W - Thumbs Up", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
             elif gesture == "thumbs_down":
                 pyautogui.press('s')
-                cv2.putText(frame, "S - Thumbs Down", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                cv2.putText(frame, "S - Thumbs Down", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
             elif gesture == "peace":
                 pyautogui.press('a')
-                cv2.putText(frame, "A - Peace", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                cv2.putText(frame, "A - Peace", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
             elif gesture == "fist":
                 pyautogui.press('d')
-                cv2.putText(frame, "D - Fist", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                cv2.putText(frame, "D - Fist", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+    # Draw Exit button
+    bx, by, bw, bh = BUTTON
+    cv2.rectangle(frame, (bx, by), (bx + bw, by + bh), (0, 0, 255), -1)
+    cv2.putText(frame, "Exit", (bx + 25, by + 28), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
     cv2.imshow("Hand Gesture Control", frame)
-    
-    if cv2.waitKey(1) & 0xFF == 27:
+
+    if state["exit"]:
+        break
+    key = cv2.waitKey(1) & 0xFF
+    if key == 27 or key == ord('q'):
         break
 
 camera.release()
