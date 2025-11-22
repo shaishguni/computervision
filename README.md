@@ -14,6 +14,9 @@ Control any app that understands the `W`, `A`, `S`, `D` keys with simple hand ge
 	```bash
 	pip install opencv-python mediapipe numpy pyautogui scipy cvzone
 	```
+    ```
+    virtualenv venv && source venv/bin/activate
+    ```
 	> `pyautogui` may require Accessibility permissions on macOS.
 
 ### Getting Started
