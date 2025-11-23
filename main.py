@@ -20,6 +20,21 @@ camera = cv2.VideoCapture(0)
 
 screen_width, screen_height = pyautogui.size()
 
+# Map each gesture to the keys that should be held simultaneously.
+GESTURE_KEY_MAP = {
+    "thumbs_up": ("w",),
+    "thumbs_down": ("s",),
+    "peace": ("w", "a"),
+    "fist": ("w", "d"),
+}
+
+GESTURE_LABEL = {
+    "thumbs_up": "W - Thumbs Up",
+    "thumbs_down": "S - Thumbs Down",
+    "peace": "W + A - Peace",
+    "fist": "W + D - Fist",
+}
+
 def get_landmark(landmarks, landmark_id):
     """Helper to get landmark coordinates"""
     return landmarks[landmark_id]
@@ -102,6 +117,8 @@ def on_mouse(event, x, y, flags, param):
 cv2.namedWindow("Hand Gesture Control")
 cv2.setMouseCallback("Hand Gesture Control", on_mouse)
 
+active_keys = set()
+
 while True:
     ret, frame = camera.read()
     if not ret:
@@ -119,18 +136,26 @@ while True:
             landmarks = hand_landmarks.landmark
             gesture = detect_gesture(landmarks)
 
-            if gesture == "thumbs_up":
-                pyautogui.press('w')
-                cv2.putText(frame, "W - Thumbs Up", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-            elif gesture == "thumbs_down":
-                pyautogui.press('s')
-                cv2.putText(frame, "S - Thumbs Down", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-            elif gesture == "peace":
-                pyautogui.press('a')
-                cv2.putText(frame, "A - Peace", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-            elif gesture == "fist":
-                pyautogui.press('d')
-                cv2.putText(frame, "D - Fist", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+            desired_keys = set(GESTURE_KEY_MAP.get(gesture, ()))
+
+            # Release keys that are no longer needed.
+            for key in active_keys - desired_keys:
+                pyautogui.keyUp(key)
+
+            # Press keys newly required by the current gesture.
+            for key in desired_keys - active_keys:
+                pyautogui.keyDown(key)
+
+            active_keys = desired_keys
+
+            label = GESTURE_LABEL.get(gesture)
+            if label:
+                cv2.putText(frame, label, (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+    if not result.multi_hand_landmarks and active_keys:
+        for key in list(active_keys):
+            pyautogui.keyUp(key)
+        active_keys.clear()
 
     # Draw Exit button
     bx, by, bw, bh = BUTTON
@@ -146,4 +171,9 @@ while True:
         break
 
 camera.release()
+if active_keys:
+    for key in list(active_keys):
+        pyautogui.keyUp(key)
+    active_keys.clear()
+
 cv2.destroyAllWindows()
