@@ -1,5 +1,6 @@
 ## Hand Gesture Keyboard Controller
 
+
 Control any app that understands the `W`, `A`, `S`, `D` keys with simple hand gestures tracked by your webcam. The script in `main.py` uses OpenCV and MediaPipe Hands to detect thumb, index, middle, ring, and pinky positions, then sends virtual key presses through `pyautogui`.
 
 ### Features
