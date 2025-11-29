@@ -25,14 +25,14 @@ GESTURE_KEY_MAP = {
     "thumbs_up": ("w",),
     "thumbs_down": ("s",),
     "peace": ("w", "a"),
-    "fist": ("w", "d"),
+    "open_hand": ("d",),
 }
 
 GESTURE_LABEL = {
     "thumbs_up": "W - Thumbs Up",
     "thumbs_down": "S - Thumbs Down",
     "peace": "W + A - Peace",
-    "fist": "W + D - Fist",
+    "open_hand": "D - Open Hand",
 }
 
 def get_landmark(landmarks, landmark_id):
@@ -81,7 +81,7 @@ def detect_gesture(landmarks):
     if thumb_down and other_fingers_folded:
         return "thumbs_down"
     
-    # ✌️ Peace Sign → A
+    # ✌️ Peace Sign → W + A
     peace = (
         index_tip.y < index_pip.y and
         middle_tip.y < middle_pip.y and
@@ -91,16 +91,15 @@ def detect_gesture(landmarks):
     if peace:
         return "peace"
     
-    # ✊ Fist → D
-    fist = (
-        thumb_tip.y > thumb_mcp.y and
-        index_tip.y > index_mcp.y and
-        middle_tip.y > middle_mcp.y and
-        ring_tip.y > ring_mcp.y and
-        pinky_tip.y > pinky_mcp.y
+    # ✋ Open Hand → D
+    open_hand = (
+        index_tip.y < index_pip.y and
+        middle_tip.y < middle_pip.y and
+        ring_tip.y < ring_pip.y and
+        pinky_tip.y < pinky_pip.y
     )
-    if fist:
-        return "fist"
+    if open_hand:
+        return "open_hand"
     
     return None
 
